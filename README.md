@@ -1,0 +1,1 @@
+Testing novel cGAN architecture using a multi-head discriminator.
