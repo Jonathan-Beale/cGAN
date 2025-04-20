@@ -103,8 +103,8 @@ def setup(SEED=42):
 
     # Dataloader
     BATCH_SIZE = 1024
-    train_loader = DataLoader(train_data_aug, num_workers=8, pin_memory=True, batch_size=BATCH_SIZE, shuffle=True)
-    val_loader = DataLoader(val_data, num_workers=8, pin_memory=True, batch_size=BATCH_SIZE, shuffle=False)
+    train_loader = DataLoader(train_data_aug, num_workers=4, pin_memory=True, batch_size=BATCH_SIZE, shuffle=True)
+    val_loader = DataLoader(val_data, num_workers=4, pin_memory=True, batch_size=BATCH_SIZE, shuffle=False)
 
 
     return train_loader, val_loader, device
