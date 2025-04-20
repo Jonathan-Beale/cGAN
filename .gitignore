@@ -1,2 +1,3 @@
-loaders/
-data/
+loaders/*
+data/*
+env/
