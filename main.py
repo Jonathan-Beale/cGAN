@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
         # Train the GAN
         print(f"Training GAN with latent dimension {dim}... Timestamp: {time.time()}")
-        results = train_gan(generator, discriminator, train_loader, val_loader, latent_dim=dim, device=device)
+        results = train_gan(generator, discriminator, train_loader, val_loader, latent_dim=dim, device=device, epochs=20)
         print(f"GAN training complete. Duration: {time.time() - start}")
 
         # save the results to a file
