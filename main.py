@@ -65,5 +65,12 @@ if __name__ == "__main__":
         # save the model weights with specific names
         generator_path = f"models/cGAN_generator_weights_ld{dim}.pth"
         discriminator_path = f"models/cGAN_discriminator_weights_ld{dim}.pth"
-        torch.save(generator.state_dict(), generator_path)
-        torch.save(discriminator.state_dict(), discriminator_path)
+        if isinstance(generator, nn.DataParallel):
+            torch.save(generator.module.state_dict(), generator_path)
+        else:
+            torch.save(generator.state_dict(), generator_path)
+
+        if isinstance(discriminator, nn.DataParallel):
+            torch.save(discriminator.module.state_dict(), discriminator_path)
+        else:
+            torch.save(discriminator.state_dict(), discriminator_path)
