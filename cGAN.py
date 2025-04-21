@@ -43,7 +43,6 @@ class Generator(nn.Module):
         self.deconv3 = nn.ConvTranspose2d(64, 1, kernel_size=3, stride=1, padding=1)  # Output: 1x28x28
 
     def forward(self, z, labels):
-        z = z.to(next(self.parameters()).device)  # Move z to model device
         labels = labels.to(z.device)  # Ensure labels match the device of z
         assert labels.min() >= 0 and labels.max() < 10, f"Generator Label Error! Min: {labels.min()}, Max: {labels.max()}"
 
@@ -66,6 +65,8 @@ def generate_test_set(generator, num_samples, latent_dim, device):
     labels = torch.randint(0, 10, (num_samples,), device=device)
     real_authentic = torch.zeros(num_samples, 1, device=device)  # Fake images
     with torch.no_grad():
+        z = z.to(device)
+        labels = labels.to(device)
         generated_images = generator(z, labels)
     return generated_images, labels, real_authentic
 

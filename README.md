@@ -7,4 +7,5 @@ pip install -r requirements.txt
 pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 pip install matplotlib opencv-python albumentations
 mkdir training loaders models generated
+python main.py
 ```
