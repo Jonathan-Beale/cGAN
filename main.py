@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
     torch.multiprocessing.freeze_support()  # Optional, safe to include
 
-    for dim in [4, 16, 64, 256]:
+    for dim in [64, 256]:
         start = time.time()
         print(f"Setting up models... Timestamp: {time.time()}")
         generator = Generator(latent_dim=dim, num_classes=10).to(device)
