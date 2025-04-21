@@ -280,6 +280,6 @@ def train_gan(generator, discriminator, train_loader, val_loader, latent_dim, de
             real_fake_preds = real_fake_preds.squeeze().cpu().numpy()  # Convert to NumPy
 
         # Save and visualize generated images
-        save_image(test_images, f"generated/generated_epoch_{epoch+1}_dim_{latent_dim}.png", nrow=5, normalize=True)
+        save_image(test_images, f"generated/generated_epoch_{epoch+1}_ld{latent_dim}.png", nrow=5, normalize=True)
         # visualize_augmentations(test_images, test_labels, class_preds, real_fake_preds, num_images=5, epoch=epoch+1, latent_dim=latent_dim)
     return train_metrics

@@ -2,6 +2,7 @@ from train import train_gan
 from cGAN import Generator, Discriminator
 from dataPrep import setup
 import torch
+import torch.nn as nn
 import torch.multiprocessing
 import time
 import pickle
@@ -38,21 +39,25 @@ if __name__ == "__main__":
 
     torch.multiprocessing.freeze_support()  # Optional, safe to include
 
-    for dim in [64, 256]:
+    for dim in [4, 16, 64, 256]:
         start = time.time()
         print(f"Setting up models... Timestamp: {time.time()}")
         generator = Generator(latent_dim=dim, num_classes=10).to(device)
         discriminator = Discriminator().to(device)
+        if torch.cuda.device_count() > 1:
+            print(f"Using {torch.cuda.device_count()} GPUs")
+            generator = nn.DataParallel(generator)
+            discriminator = nn.DataParallel(discriminator)
         print(f"Models setup complete. Duration: {time.time() - start}")
 
         # Train the GAN
         print(f"Training GAN with latent dimension {dim}... Timestamp: {time.time()}")
-        results = train_gan(generator, discriminator, train_loader, val_loader, latent_dim=dim, device=device, epochs=20)
+        results = train_gan(generator, discriminator, train_loader, val_loader, latent_dim=dim, device=device, epochs=10)
         print(f"GAN training complete. Duration: {time.time() - start}")
 
         # save the results to a file
         import json
-        with open(f"results_ld{dim}.json", "w") as f:
+        with open(f"training/results_ld{dim}.json", "w") as f:
             json.dump(results, f)
 
         # save the model weights with specific names
