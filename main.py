@@ -42,12 +42,14 @@ if __name__ == "__main__":
     for dim in [4, 16, 64, 256]:
         start = time.time()
         print(f"Setting up models... Timestamp: {time.time()}")
-        generator = Generator(latent_dim=dim, num_classes=10).to(device)
-        discriminator = Discriminator().to(device)
+        generator = Generator(latent_dim=dim, num_classes=10)
+        discriminator = Discriminator()
         if torch.cuda.device_count() > 1:
             print(f"Using {torch.cuda.device_count()} GPUs")
             generator = nn.DataParallel(generator)
             discriminator = nn.DataParallel(discriminator)
+        generator = generator.to(device)
+        discriminator = discriminator.to(device)
         print(f"Models setup complete. Duration: {time.time() - start}")
 
         # Train the GAN
