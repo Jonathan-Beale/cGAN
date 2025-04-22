@@ -1,17 +1,29 @@
-from train import train_gan
-from cGAN import Generator, Discriminator
-from dataPrep import setup
+import argparse
 import torch
 import torch.multiprocessing
 import time
 import pickle
+import json
+
+from train import train_gan
+from cGAN import Generator, Discriminator
+from dataPrep import setup
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Train cGAN with specific latent dimension.")
+    parser.add_argument('--latent_dim', type=int, required=True, help='Latent dimension size (e.g., 16, 64, 256)')
+    parser.add_argument('--epochs', type=int, default=10, help='Number of training epochs')
+    args = parser.parse_args()
+
+    latent_dim = args.latent_dim
+    epochs = args.epochs
+
+    torch.multiprocessing.freeze_support()  # Windows-safe
+
     start = time.time()
     print(f"Setting up data... Timestamp: {time.time()}")
     train_loader, val_loader, device = setup()
     print(f"Data setup complete. Duration: {time.time() - start}")
-    # save the loaders
 
     start = time.time()
     print(f"Saving loaders... Timestamp: {time.time()}")
@@ -21,42 +33,31 @@ if __name__ == "__main__":
         pickle.dump(val_loader, f)
     print(f"Loaders saved. Duration: {time.time() - start}")
 
-    # start = time.time()
-    # print(f"Loading loaders... Timestamp: {time.time()}")
-    # # Load the loaders
-    # with open("loaders/train_loader.pkl", "rb") as f:
-    #     train_loader = pickle.load(f)
-    # with open("loaders/val_loader.pkl", "rb") as f:
-    #     val_loader = pickle.load(f)
-    # print(f"Loaders loaded. Duration: {time.time() - start}")
+    print(f"Setting up models with latent_dim = {latent_dim}... Timestamp: {time.time()}")
+    generator = Generator(latent_dim=latent_dim, num_classes=10)
+    discriminator = Discriminator()
 
-    # start = time.time()
-    # print(f"Setting up models... Timestamp: {time.time()}")
-    # generator = Generator(latent_dim=100, num_classes=10).to(device)
-    # discriminator = Discriminator().to(device)
-    # print(f"Models setup complete. Duration: {time.time() - start}")
+    if torch.cuda.device_count() > 1:
+        print(f"Using {torch.cuda.device_count()} GPUs")
+        generator = torch.nn.DataParallel(generator)
+        discriminator = torch.nn.DataParallel(discriminator)
 
-    torch.multiprocessing.freeze_support()  # Optional, safe to include
+    generator = generator.to(device)
+    discriminator = discriminator.to(device)
+    print(f"Models setup complete. Duration: {time.time() - start}")
 
-    for dim in [64, 256]:
-        start = time.time()
-        print(f"Setting up models... Timestamp: {time.time()}")
-        generator = Generator(latent_dim=dim, num_classes=10).to(device)
-        discriminator = Discriminator().to(device)
-        print(f"Models setup complete. Duration: {time.time() - start}")
+    print(f"Training GAN with latent dimension {latent_dim} for {epochs} epochs... Timestamp: {time.time()}")
+    results = train_gan(generator, discriminator, train_loader, val_loader, latent_dim=latent_dim, device=device, epochs=epochs)
+    print(f"GAN training complete. Duration: {time.time() - start}")
 
-        # Train the GAN
-        print(f"Training GAN with latent dimension {dim}... Timestamp: {time.time()}")
-        results = train_gan(generator, discriminator, train_loader, val_loader, latent_dim=dim, device=device, epochs=20)
-        print(f"GAN training complete. Duration: {time.time() - start}")
+    with open(f"results_ld{latent_dim}.json", "w") as f:
+        json.dump(results, f)
 
-        # save the results to a file
-        import json
-        with open(f"results_ld{dim}.json", "w") as f:
-            json.dump(results, f)
-
-        # save the model weights with specific names
-        generator_path = f"models/cGAN_generator_weights_ld{dim}.pth"
-        discriminator_path = f"models/cGAN_discriminator_weights_ld{dim}.pth"
+    generator_path = f"models/cGAN_generator_weights_ld{latent_dim}.pth"
+    discriminator_path = f"models/cGAN_discriminator_weights_ld{latent_dim}.pth"
+    if isinstance(generator, torch.nn.DataParallel):
+        torch.save(generator.module.state_dict(), generator_path)
+        torch.save(discriminator.module.state_dict(), discriminator_path)
+    else:
         torch.save(generator.state_dict(), generator_path)
         torch.save(discriminator.state_dict(), discriminator_path)
