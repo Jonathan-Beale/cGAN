@@ -1,6 +1,5 @@
 import argparse
 import torch
-import torch.nn as nn
 import torch.multiprocessing
 import time
 import pickle
@@ -35,16 +34,8 @@ if __name__ == "__main__":
     print(f"Loaders saved. Duration: {time.time() - start}")
 
     print(f"Setting up models with latent_dim = {latent_dim}... Timestamp: {time.time()}")
-    generator = Generator(latent_dim=latent_dim, num_classes=10)
-    discriminator = Discriminator()
-
-    if torch.cuda.device_count() > 1:
-        print(f"Using {torch.cuda.device_count()} GPUs")
-        generator = torch.nn.DataParallel(generator)
-        discriminator = torch.nn.DataParallel(discriminator)
-
-    generator = generator.to(device)
-    discriminator = discriminator.to(device)
+    generator = Generator(latent_dim=latent_dim, num_classes=10).to(device)
+    discriminator = Discriminator().to(device)
     print(f"Models setup complete. Duration: {time.time() - start}")
 
     print(f"Training GAN with latent dimension {latent_dim} for {epochs} epochs... Timestamp: {time.time()}")
