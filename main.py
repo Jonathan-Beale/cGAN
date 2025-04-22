@@ -1,5 +1,6 @@
 import argparse
 import torch
+import torch.nn as nn
 import torch.multiprocessing
 import time
 import pickle

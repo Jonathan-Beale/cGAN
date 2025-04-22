@@ -196,10 +196,11 @@ def train_gan(generator, discriminator, train_loader, val_loader, latent_dim, de
                 #  Train Generator
                 # ---------------------
                 generator.train()
-                z = torch.randn(real_images.size(0), latent_dim, device=device)
-                fake_labels = torch.randint(0, 10, (real_images.size(0),), device=device)
+                z = torch.randn(real_images.size(0), latent_dim).to(device)
+                fake_labels = torch.randint(0, 10, (real_images.size(0),)).to(device)
                 fake_images = generator(z, fake_labels)
-                fake_authentic = torch.ones(real_images.size(0), 1, device=device)  # Generator wants to fool discriminator
+                fake_authentic = torch.ones(real_images.size(0), 1).to(device)  # Generator wants to fool discriminator
+                print(f"[GPU] batch {batch_idx}: z on {z.device}, fake_labels on {fake_labels.device}")
 
                 class_output, disc_output = discriminator(fake_images)
                 loss_gen_class = criterion_class(class_output, fake_labels)  # Encourage class-aware generation
@@ -280,6 +281,6 @@ def train_gan(generator, discriminator, train_loader, val_loader, latent_dim, de
             real_fake_preds = real_fake_preds.squeeze().cpu().numpy()  # Convert to NumPy
 
         # Save and visualize generated images
-        save_image(test_images, f"generated/generated_epoch_{epoch+1}_dim_{latent_dim}.png", nrow=5, normalize=True)
+        save_image(test_images, f"generated/generated_epoch_{epoch+1}_ld{latent_dim}.png", nrow=5, normalize=True)
         # visualize_augmentations(test_images, test_labels, class_preds, real_fake_preds, num_images=5, epoch=epoch+1, latent_dim=latent_dim)
     return train_metrics
