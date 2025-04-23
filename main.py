@@ -5,7 +5,7 @@ import time
 import pickle
 import json
 
-from train import train_gan
+from train import train_gan, train_trad_gan
 from cGAN import Generator, Discriminator
 from dataPrep import setup
 
@@ -13,10 +13,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train cGAN with specific latent dimension.")
     parser.add_argument('--latent_dim', type=int, required=True, help='Latent dimension size (e.g., 16, 64, 256)')
     parser.add_argument('--epochs', type=int, default=10, help='Number of training epochs')
+    parser.add_argument('--model_type', type=str, default='cGAN', help='Type of model to train (cGAN, tradGAN)')
     args = parser.parse_args()
 
     latent_dim = args.latent_dim
     epochs = args.epochs
+    type = args.model_type
 
     torch.multiprocessing.freeze_support()  # Windows-safe
 
@@ -39,7 +41,11 @@ if __name__ == "__main__":
     print(f"Models setup complete. Duration: {time.time() - start}")
 
     print(f"Training GAN with latent dimension {latent_dim} for {epochs} epochs... Timestamp: {time.time()}")
-    results = train_gan(generator, discriminator, train_loader, val_loader, latent_dim=latent_dim, device=device, epochs=epochs)
+    if type == "cGAN":
+        results = train_gan(generator, discriminator, train_loader, val_loader, latent_dim=latent_dim, device=device, epochs=epochs)
+    else:
+        results = train_trad_gan(generator, discriminator, train_loader, val_loader, latent_dim=latent_dim, device=device, epochs=epochs)
+
     print(f"GAN training complete. Duration: {time.time() - start}")
 
     with open(f"results_ld{latent_dim}.json", "w") as f:
